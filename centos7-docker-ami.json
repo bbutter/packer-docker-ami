@@ -1,0 +1,50 @@
+{
+  "variables": {
+    "aws_profile": "{{env `AWS_PROFILE`}}",
+    "source_ami": "ami-0c2aba6c",
+    "destination_regions": "us-west-2",
+    "instance_username": "centos",
+    "instance_type": "t2.micro",
+    "ami_name": "centos7-docker-ami"
+
+},
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "profile": "{{ user `aws_profile`}}",
+      "ami_regions":"{{ user `destination_regions`}}",
+      "region": "{{ user `destination_regions`}}",
+      "source_ami": "{{ user `source_ami`}}",
+      "instance_type": "{{ user `instance_type`}}",
+      "ssh_username": "{{ user `instance_username`}}",
+      "subnet_id":" subnet-604fcc28",
+      "ami_virtualization_type": "hvm",
+      "ami_name": "{{ user `ami_name`}} {{timestamp}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "docker.repo",
+      "destination": "/tmp/docker.repo"
+    },
+    {
+      "type": "file",
+      "source": "docker_install.sh",
+      "destination": "/tmp/docker_install.sh"
+    },
+    {
+      "type": "file",
+      "source": "awscli_install.sh",
+      "destination": "/tmp/awscli_install.sh"
+    },
+    {
+      "type": "shell",
+      "inline":[
+          "sudo yum update -y",
+          "sudo bash /tmp/awscli_install.sh",
+          "sudo bash /tmp/docker_install.sh"
+      ]
+    }
+  ]
+}
